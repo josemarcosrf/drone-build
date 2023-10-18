@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  drone-server:
+    image: meliorai/drone:latest
+    container_name: drone-server
+    restart: always
+    env_file: drone.env
+    ports:
+      - 8787:80
+    depends_on:
+      - mysql
+      - drone-runner-docker
+
+  drone-runner-docker:
+    image: drone/drone-runner-docker:1
+    container_name: drone-runner-docker
+    restart: always
+    env_file: drone-runner-docker.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  mysql:
+    # Connecting from CLI:
+    # mysql --host=127.0.0.1 --port=3306 --user=jose --password=j0s3.m4rc0s!
+    image: mysql:latest
+    # networks:
+    #   - tools
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root.s3cr3t
+      MYSQL_DATABASE: defaultdb
+      MYSQL_USER: Sponge.Bob
+      MYSQL_PASSWORD: sqr#p4nts
+
+# Mount volumes makes it independent of the directory structure:
+# https://stackoverflow.com/a/47152658/1522304
+volumes:
+  mysql-data:
+    driver: local
